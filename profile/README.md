@@ -20,17 +20,15 @@ This identity — operator *is* owner — has been so universally true that nobo
 | railway-cli | `~/.railway/config.json` | No |
 | weibo-cli | `~/.config/weibo-cli/credential.json` | No |
 
-Almost all store credentials as plaintext on disk. The best case, gh-cli, uses the system keyring — but a simple `gh auth token` command still retrieves the raw secret. Encryption at rest helps, but it is not enough when the agent can query the credential through a command.
+Almost all store credentials as plaintext on disk. The best case, gh-cli, uses the system keyring — but a simple `gh auth token` command still retrieves the raw secret.
 
 ## What Changes with Agents
 
 Now there is a reason.
 
-When you ask an AI agent to "check my mentions on Twitter" or "send a message on Discord," you want it to perform a specific action using your account. You are not handing over your credentials for the agent to do whatever it likes — you are asking it to act on your behalf, within a scope you have in mind.
+When you ask an AI agent to "check my mentions on Twitter" or "send a message on Discord," you have a specific action in mind. But the agent runs under your user account, in your shell, with your filesystem. It can read your credential files, query your keyrings, and run any command you could run. There is no way to say "you may read my mentions but not post tweets." In practice, you give the agent everything or nothing.
 
-But the infrastructure doesn't know the difference. The agent runs under your user account, in your shell, with your filesystem. If `~/.config/tool/credential.json` is readable by you, it is readable by the agent. If `env` prints your tokens, the agent can run `env`. There is no mechanism to say "you may use this credential to post a tweet, but you may not read, copy, or transmit the credential itself." The only option today is to give the agent everything or nothing.
-
-This gap between what the user intends (let the agent act for me) and what actually happens (the agent gets my raw secrets) is where the danger lies. An honest agent doesn't need your secrets — it needs to perform actions. But a prompt injection — malicious instructions hidden in a webpage, a document, an API response — can exploit the fact that the agent *has* the secrets even though it only *needed* the actions. The agent wasn't designed to exfiltrate your credentials, but it was given the ability to, and that ability can be triggered by an attacker who never needed to break into your machine.
+A prompt injection — malicious instructions hidden in a webpage, a document, an API response — can exploit both: the agent's unrestricted access to raw credentials, and its unrestricted ability to perform actions. The agent can be tricked into exfiltrating your secrets or performing destructive actions on your accounts, by an attacker who never needed to break into your machine.
 
 ## The Threat Model
 
