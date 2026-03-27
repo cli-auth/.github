@@ -66,7 +66,20 @@ Attackers who exploit this surface can cause harm in two ways: **credential thef
 
 ## Our Approach
 
-Stay tuned.
+https://github.com/cli-auth/cli-box is our first approach.
+
+**Credentials stay on a trusted remote host. The agent's machine is untrusted by design.**
+
+Instead of credentials following the user to wherever they work, CLI executions travel to where the credentials live, they execute inside an isolated sandbox on the server. The agent receives output. It never sees secrets.
+
+A policy engine on the server — Starlark scripts, one per CLI — controls which credentials mount and which invocations are allowed. Every invocation is logged to an audit store.
+
+This directly addresses each threat level:
+
+- Level 1 (Passive Observation): Credentials never enter the agent's context. The agent invokes `gh repo list` and receives a list of repos. No token is read by agent and transmitted to model.
+- Level 2 (File-Based Extraction): There are no credential files on the agent's machine to read.
+- Level 3 (Command-Based Leakage): Credential files are absent locally. The policy layer is where we intend to address commands that explicitly print credentials (like `gh auth token`).
+- Level 4 (Arbitrary Code Execution): Policy enforcement, audit logging, and human approval for sensitive operations mitigate damage but cannot eliminate it.
 
 ## Get Involved
 
